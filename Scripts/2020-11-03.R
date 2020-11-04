@@ -134,7 +134,8 @@ ikea_volume %>%
     ggplot(aes(volume_m3, price_usd, color = category)) +
     geom_point() +
     scale_x_log10() +
-    scale_y_log10()
+    scale_y_log10() +
+    geom_smooth(se = F)
 
 ##################################################################
 
