@@ -7,6 +7,7 @@ library(scales)
 theme_set(theme_light())
 library(ggthemes)
 library(glue)
+library(ggridges)
 
 
 ## Download the dataset
@@ -74,3 +75,44 @@ ikea_cleaned %>%
 
 
 ###################################################################
+
+
+ikea_cleaned %>%
+    add_count(category, name = "category_total") %>%
+    mutate(
+        category = glue("{category} ({category_total})"),
+        category = fct_reorder(category, price_usd)
+    ) %>%
+    ggplot(aes(price_usd, category)) +
+    geom_density_ridges() +
+    scale_x_log10(label = dollar_format()) +
+    labs(title = "How much do items in each category cost ?",
+         x = "Price(USD)",
+         y = "")
+
+##################################################################
+
+ikea_cleaned %>% 
+    mutate(name = fct_lump(name, 20)) %>% 
+    filter(!name == "Other") %>% 
+    count(name, category, sort = T) %>% 
+    mutate(name = fct_reorder(name, n, sum),
+           category = fct_reorder(category, n, sum)) %>% 
+    ggplot(aes(n, name, fill = category)) +
+    geom_col() +
+    scale_fill_discrete(guide = guide_legend(reverse = T))
+##################################################################
+
+
+##################################################################
+
+##################################################################
+
+##################################################################
+
+##################################################################
+
+##################################################################
+
+##################################################################
+
