@@ -138,7 +138,12 @@ ikea_volume %>%
     geom_smooth(se = F)
 
 ##################################################################
-
+ikea %>% 
+    group_by(designer) %>% 
+    summarise(n_items = n(),
+              n_names = n_distinct(name),
+              n_categoties = n_distinct(category)) %>% 
+    arrange(desc(n_names))
 
 ##################################################################
 
