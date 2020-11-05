@@ -49,3 +49,53 @@ turbine_spec <- decision_tree(cost_complexity = tune(),
     set_engine(engine = "rpart") %>% 
     set_mode(mode = "regression")
 
+
+# Grid Spec
+
+turbine_grid <- grid_regular(cost_complexity(),
+             tree_depth(),
+             min_n(),levels = 5)
+
+# Set up parallel processing
+doParallel::registerDoParallel()
+
+
+# Fit the model
+set.seed(343)
+
+turbine_res <- tune_grid(
+    turbine_spec,
+    turbine_rated_capacity_k_w~.,
+    resamples = turbine_cv,
+    grid = turbine_grid,
+    metrics = metric_set(rmse, rsq, mae, mape),
+    control = control_grid(verbose = T,allow_par = T)
+)
+
+# Results
+turbine_res %>% collect_metrics()
+turbine_res %>% autoplot()
+
+turbine_res %>% show_best()
+
+turbine_res %>% select_best("rmse")
+
+
+# Lets finalize the model
+turbine_final_spec <- turbine_spec %>% 
+    finalize_model(turbine_res %>%
+                       select_best("rmse"))
+
+# Lets fit this final model to the entire data
+
+final_fit <- turbine_final_spec %>% 
+    fit(turbine_rated_capacity_k_w~., 
+        turbine_train)
+
+
+final_res <- turbine_final_spec %>% 
+    last_fit(turbine_rated_capacity_k_w~.,
+             turbine_split)
+
+## Lets check final results
+final_res %>% collect_metrics()
