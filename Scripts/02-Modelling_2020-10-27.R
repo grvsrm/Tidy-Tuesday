@@ -89,7 +89,7 @@ final_res %>% collect_metrics()
 final_fit %>% 
     write_rds(here("models", "wind_turbine_dt_model.rds"))
 
-# In future if we want to predict anything on this model then...
+# For prediction using this model
 
 # First  method
 final_fit %>% 
@@ -98,6 +98,16 @@ final_fit %>%
 
 # Second Method
 final_res$.workflow[[1]] %>% 
-    predict(turbine_train[44,])
+    predict(turbine_test[44,])
 
-predict(final_res$.workflow[[1]], turbine_train[2,])
+# In future if we want to predict anything on this model then...
+
+# Third  method
+wind_turbine_model <- read_rds(here("models",
+                                    "wind_turbine_dt_model.rds"))
+
+wind_turbine_model %>% 
+    predict(turbine_test[44,])
+
+# End of script
+
