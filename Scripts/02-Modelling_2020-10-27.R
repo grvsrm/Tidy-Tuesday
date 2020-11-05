@@ -3,25 +3,8 @@ library(tidyverse)
 library(tidymodels)
 library(here)
 
-
-# Download and save the data as an rds object
-
-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-10-27/wind-turbine.csv') %>% 
-    write_rds(here("data", "wind_turbine.rds"))
-
-
-# Cleaning
-wind_turbine_raw <- read_rds(here("data", "wind_turbine.rds"))
-
-wind_turbine <-  wind_turbine_raw %>% 
-    mutate(turbine_capacity = row_number(),
-           commissioning_date = parse_number(commissioning_date),
-           model = fct_lump(model, 10),
-           province_territory = fct_lump(province_territory, 8)) %>% 
-    filter(!is.na(turbine_rated_capacity_k_w)) %>% 
-    select(turbine_capacity, commissioning_date, model, province_territory, rotor_diameter_m,
-           hub_height_m, turbine_rated_capacity_k_w) %>% 
-    mutate_if(is.character, factor)
+# Load the clean data
+wind_turbine <- read_rds(here("data", "wind_turbine.rds"))
 
 
 ##### Modelling
@@ -39,8 +22,7 @@ turbine_test <- testing(turbine_split)
 
 turbine_cv <- turbine_train %>% 
     vfold_cv()
-    
-# Recipe
+
 
 # Model Spec
 turbine_spec <- decision_tree(cost_complexity = tune(),
@@ -53,8 +35,8 @@ turbine_spec <- decision_tree(cost_complexity = tune(),
 # Grid Spec
 
 turbine_grid <- grid_regular(cost_complexity(),
-             tree_depth(),
-             min_n(),levels = 5)
+                             tree_depth(),
+                             min_n(),levels = 5)
 
 # Set up parallel processing
 doParallel::registerDoParallel()
@@ -74,6 +56,7 @@ turbine_res <- tune_grid(
 
 # Results
 turbine_res %>% collect_metrics()
+
 turbine_res %>% autoplot()
 
 turbine_res %>% show_best()
@@ -99,3 +82,22 @@ final_res <- turbine_final_spec %>%
 
 ## Lets check final results
 final_res %>% collect_metrics()
+
+
+# Lets save this model for future(if reqd)
+
+final_fit %>% 
+    write_rds(here("models", "wind_turbine_dt_model.rds"))
+
+# In future if we want to predict anything on this model then...
+
+# First  method
+final_fit %>% 
+    predict(turbine_test[44,])
+
+
+# Second Method
+final_res$.workflow[[1]] %>% 
+    predict(turbine_train[44,])
+
+predict(final_res$.workflow[[1]], turbine_train[2,])
