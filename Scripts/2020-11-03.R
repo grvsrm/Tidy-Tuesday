@@ -27,6 +27,9 @@ ikea_cleaned <- ikea %>%
            short_description = str_trim(str_replace_all(short_description, "\\s+", ""))) %>% 
     add_count(category, name = "category_total")
 
+ikea_cleaned %>% 
+    write_rds("Data/ikea_cleaned.rds")
+
 ### Tidy Exploration starts here..
 
 ikea_cleaned %>% 
