@@ -1,23 +1,23 @@
 # Load the libraries
 library(tidyverse)
 library(scales)
+library(here)
 theme_set(theme_light())
 
 
 # Download the data
 tt <- tidytuesdayR::tt_load("2020-09-22")
-peaks_raw <- tt$peaks
-members_raw <- tt$members
-expeditions_raw <- tt$expeditions
 
-# Save the data
-peaks_raw %>% 
-    write_rds("peaks_raw.RDS")
-members_raw %>% 
-    write_rds("members_raw.rds")
-expeditions_raw %>% 
-    write_rds("expedition_raw.rds")
+# Save the raw data
+tt$peaks %>% 
+    write_rds(here("data",
+                   "peaks_raw.RDS"))
+tt$members %>% 
+    write_rds(here("data",
+                   "members_raw.rds"))
+tt$expeditions %>% 
+    write_rds(here("data",
+                   "expedition_raw.rds"))
 
-# Transform the data (If needed)
-peaks %>% 
-    count(climbing_status)
+# Clean the data (If needed)
+peaks <- read_rds(here("data", "peaks_raw.rds"))
