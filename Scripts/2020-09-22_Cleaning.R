@@ -19,5 +19,9 @@ tt$expeditions %>%
     write_rds(here("data",
                    "expedition_raw.rds"))
 
-# Clean the data (If needed)
+# Load the data from r objects
 peaks <- read_rds(here("data", "peaks_raw.rds"))
+members <- read_rds(here("data", "members_raw.rds"))
+expedition <- read_rds(here("data", "expedition_raw.rds"))
+
+# Clean the data (If needed)
