@@ -65,8 +65,10 @@ peaks_eb %>%
     geom_errorbarh(aes(xmin = .low, xmax = .high), alpha = 0.5) +
     scale_x_continuous(labels = percent) +
     labs(title = "How deadly these mountains are???",
+         subtitle = "Only peaks with atleast 200 climbers have been included",
          x = "Death Rate (Empirical Bayes Adjusted + 95% credible interval)",
-         y = "")
+         y = "",
+         caption = "Data Source: R4DS Tidy Tuesday 2020-09-22")
 
 
 
