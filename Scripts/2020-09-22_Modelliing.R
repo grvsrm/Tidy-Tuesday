@@ -70,5 +70,5 @@ peaks_eb %>%
          y = "",
          caption = "Data Source: R4DS Tidy Tuesday 2020-09-22")
 
-peaks_summary
+peaks_summary %>% count(climber)
 
