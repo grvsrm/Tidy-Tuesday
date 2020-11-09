@@ -84,7 +84,7 @@ expedition %>%
     geom_histogram()
 
 expedition %>% 
-    mutate(days_to_highpoint = highpoint_date - basecamp_date) %>% 
+    mutate(days_to_highpoint = as.integer(highpoint_date - basecamp_date)) %>% 
     filter(!is.na(peak_name),
            !is.na(days_to_highpoint),
            success == "Success") %>% 
