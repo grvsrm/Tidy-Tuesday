@@ -25,3 +25,5 @@ members <- read_rds(here("data", "members_raw.rds"))
 expedition <- read_rds(here("data", "expedition_raw.rds"))
 
 # Clean the data (If needed)
+
+
