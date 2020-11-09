@@ -28,16 +28,21 @@ peaks %>%
          y = "",
          color = "")
 
+summary_expeditions <- function(tbl) {
+    tbl %>% 
+    summarise(n_climbs = n(),
+          pct_success = mean(success == "Success"),
+          across(members:hired_staff_deaths, sum),
+          first_climb = min(year)) %>% 
+        mutate(pct_deaths = member_deaths/members,
+        pct_hired_staff_death = hired_staff_deaths/hired_staff)
+}
+
 peaks_summary <- expedition %>% 
     group_by(peak_id, peak_name) %>% 
-    summarise(n_climbs = n(),
-              pct_success = mean(success == "Success"),
-              across(members:hired_staff_deaths, sum),
-              first_climb = min(year)) %>% 
+    summary_expeditions() %>% 
     ungroup() %>% 
     arrange(desc(n_climbs)) %>% 
-    mutate(pct_deaths = member_deaths/members,
-           pct_hired_staff_death = hired_staff_deaths/hired_staff) %>% 
     inner_join(peaks %>% select(peak_id, height_metres))
 
 # How deadly these mountains are???
@@ -105,3 +110,23 @@ expedition %>%
          y = "",
          caption = "Data Source: R4DS Tidy Tuesday Data",
          subtitle = "Successful climbs only")
+
+everest_by_decade <- expedition %>% 
+    filter(peak_name == "Everest") %>% 
+    mutate(decade = pmax(10*year%/%10, 1970)) %>% 
+    group_by(decade) %>% 
+    summary_expeditions()
+    
+everest_by_decade %>% 
+    ggplot(aes(decade, pct_deaths)) +
+    geom_point(aes(size = members)) +
+    geom_line() +
+    scale_x_continuous(breaks = seq(1970,2010, 10), 
+                       labels = c("> 1980", seq(1980, 2010, 10))) +
+    scale_y_continuous(labels = percent) +
+    expand_limits(y = 0) +
+    labs(title = " The Everest has become less deadly over time..",
+     x = "",
+     y = "",
+     caption = "Data Source: R4DS Tidy Tuesday Data",
+     subtitle = "Successful climbs only")
