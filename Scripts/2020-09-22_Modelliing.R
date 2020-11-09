@@ -136,8 +136,15 @@ everest_by_decade %>%
      subtitle = "Successful climbs only")
 
 
-members %>% 
+model_glm <- members %>% 
     filter(peak_name == "Everest") %>% 
     mutate(leader = expedition_role == "Leader") %>% 
-    glm(died ~ year + sex + age + lea + hired, data = ., family = "binomial") %>% 
-    tidy()
+    glm(died ~ year + sex + age + leader + hired * oxygen_used, data = ., family = "binomial")
+
+model_glm %>% 
+    tidy(conf.int = T, exponentiate = T) %>% 
+    filter(term != "(Intercept)") %>% 
+    mutate(term = fct_reorder(term, estimate)) %>% 
+    ggplot(aes(estimate, term)) +
+    geom_point() +
+    geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = )
