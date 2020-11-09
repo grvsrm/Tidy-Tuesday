@@ -3,6 +3,7 @@ library(tidyverse)
 library(scales)
 library(here)
 library(ebbr)
+library(broom)
 theme_set(theme_light())
 
 
@@ -119,8 +120,10 @@ everest_by_decade <- expedition %>%
     
 everest_by_decade %>% 
     ggplot(aes(decade, pct_deaths)) +
-    geom_point(aes(size = members)) +
-    geom_line() +
+    geom_point(aes(size = members, color = "All Climbers")) +
+    geom_line(aes(color = "All Climbers")) +
+    geom_point(aes(y = pct_hired_staff_death ,size = members, color = "Hired Staff")) +
+    geom_line(aes(y = pct_hired_staff_death ,color = "Hired Staff")) +
     scale_x_continuous(breaks = seq(1970,2010, 10), 
                        labels = c("> 1980", seq(1980, 2010, 10))) +
     scale_y_continuous(labels = percent) +
@@ -128,5 +131,13 @@ everest_by_decade %>%
     labs(title = " The Everest has become less deadly over time..",
      x = "",
      y = "",
+     color = "",
      caption = "Data Source: R4DS Tidy Tuesday Data",
      subtitle = "Successful climbs only")
+
+
+members %>% 
+    filter(peak_name == "Everest") %>% 
+    mutate(leader = expedition_role == "Leader") %>% 
+    glm(died ~ year + sex + age + lea + hired, data = ., family = "binomial") %>% 
+    tidy()
