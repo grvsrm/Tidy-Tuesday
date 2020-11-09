@@ -22,8 +22,16 @@ tt$expeditions %>%
 # Load the data from r objects
 peaks <- read_rds(here("data", "peaks_raw.rds"))
 members <- read_rds(here("data", "members_raw.rds"))
-expedition <- read_rds(here("data", "expedition_raw.rds"))
+expedition_raw <- read_rds(here("data", "expedition_raw.rds"))
 
 # Clean the data (If needed)
+na_reason <- c("Did not attempt climb", "Did not reach base camp", "Unknown", "Attempt rumoured")
 
+expedition <- expedition_raw %>% 
+    mutate(success = case_when(str_detect(termination_reason, "Success") ~ "Success",
+                              termination_reason %in% na_reason ~ "Other",
+                              TRUE ~ "Failure"))
 
+# Save the clean data
+expedition %>% 
+    write_rds(here("data", "expedition.rds"))

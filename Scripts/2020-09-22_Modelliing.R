@@ -9,7 +9,7 @@ theme_set(theme_light())
 # Load the data from r objects
 peaks <- read_rds(here("data", "peaks_raw.rds"))
 members <- read_rds(here("data", "members_raw.rds"))
-expedition <- read_rds(here("data", "expedition_raw.rds"))
+expedition <- read_rds(here("data", "expedition.rds"))
 
 # Data Exploration
 
@@ -31,6 +31,7 @@ peaks %>%
 peaks_summary <- expedition %>% 
     group_by(peak_id, peak_name) %>% 
     summarise(n_climbs = n(),
+              pct_success = mean(success == "Success"),
               across(members:hired_staff_deaths, sum),
               first_climb = min(year)) %>% 
     ungroup() %>% 
@@ -70,4 +71,25 @@ peaks_eb %>%
          y = "",
          caption = "Data Source: R4DS Tidy Tuesday 2020-09-22")
 
+peaks_eb %>% 
+    filter(members >= 100) %>% 
+    ggplot(aes(height_metres, .fitted)) +
+    geom_point(aes(size = members)) +
+    geom_text(aes(label = peak_name), hjust = 1, vjust = 1, check_overlap = T)
+
+
+expedition %>% 
+    mutate(days_to_highpoint = highpoint_date - basecamp_date) %>% 
+    ggplot(aes(days_to_highpoint)) +
+    geom_histogram()
+
+expedition %>% 
+    mutate(days_to_highpoint = highpoint_date - basecamp_date) %>% 
+    filter(!is.na(peak_name),
+           !is.na(days_to_highpoint),
+           success == "Success") %>% 
+    mutate(peak_name = fct_lump(peak_name, 10),
+           peak_name = fct_reorder(peak_name, days_to_highpoint)) %>% 
+    ggplot(aes(days_to_highpoint, peak_name)) +
+    geom_boxplot()
 
