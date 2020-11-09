@@ -79,17 +79,29 @@ peaks_eb %>%
 
 
 expedition %>% 
-    mutate(days_to_highpoint = highpoint_date - basecamp_date) %>% 
     ggplot(aes(days_to_highpoint)) +
     geom_histogram()
 
 expedition %>% 
-    mutate(days_to_highpoint = as.integer(highpoint_date - basecamp_date)) %>% 
     filter(!is.na(peak_name),
            !is.na(days_to_highpoint),
            success == "Success") %>% 
     mutate(peak_name = fct_lump(peak_name, 10),
            peak_name = fct_reorder(peak_name, days_to_highpoint)) %>% 
     ggplot(aes(days_to_highpoint, peak_name)) +
-    geom_boxplot()
+    geom_boxplot() +
+    labs(title = "How long does it take to reach high point of the peak?",
+         x = "Days to reach high point from basecamp",
+         y = "",
+         caption = "Data Source: R4DS Tidy Tuesday Data",
+         subtitle = "Successful climbs only")
 
+expedition %>% 
+    filter(peak_name == "Everest") %>% 
+    ggplot(aes(days_to_highpoint)) +
+    geom_density(aes(color = success, fill = success), alpha = 0.4) +
+    labs(title = "How long does it take to reach high point of the Everest?",
+         x = "Days to reach high point from basecamp",
+         y = "",
+         caption = "Data Source: R4DS Tidy Tuesday Data",
+         subtitle = "Successful climbs only")
