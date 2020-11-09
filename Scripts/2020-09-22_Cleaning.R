@@ -30,7 +30,9 @@ na_reason <- c("Did not attempt climb", "Did not reach base camp", "Unknown", "A
 expedition <- expedition_raw %>% 
     mutate(success = case_when(str_detect(termination_reason, "Success") ~ "Success",
                               termination_reason %in% na_reason ~ "Other",
-                              TRUE ~ "Failure"))
+                              TRUE ~ "Failure"),
+           days_to_highpoint = as.integer(highpoint_date - basecamp_date))
+
 
 # Save the clean data
 expedition %>% 
