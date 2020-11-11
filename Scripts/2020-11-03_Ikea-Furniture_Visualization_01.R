@@ -4,7 +4,7 @@ library(jkmisc)
 library(ggraph)
 library(tidygraph)
 library(glue)
-library(ggtext)
+library(ggtext) 
 library(magick)
 
 ikea <- read_rds(here("data", "ikea_raw.rds"))
@@ -54,7 +54,7 @@ stem_labels <- create_layout(final_graph, layout = 'dendrogram', circular = TRUE
     filter(leaf == FALSE) %>% 
     slice(-1) %>% 
     mutate(percent = n/sum(n, na.rm = TRUE)) %>% 
-    mutate(label = str_to_upper(str_replace_all(str_wrap(node, 10), "(?<=.)(?!$)", " "))) %>% 
+    mutate(label = str_to_upper(str_replace_all(str_wrap(node, 1), "(?<=.)(?!$)", " "))) %>% 
     mutate(xend = case_when(node == "Sofas & armchairs" ~ x - 0.1,
                             node == "Sideboards, buffets & console tables" ~ x -0.07,
                             node == "Outdoor furniture" ~ x + 0.01,
@@ -81,7 +81,10 @@ lines <- stem_labels %>%
 
 plot <- ggraph(final_graph, layout = 'dendrogram', circular = TRUE) + 
     geom_edge_diagonal(colour  = "#FFDA1A", alpha = 0.1, width = 0.9) +
-    geom_node_text(aes(x = x*3, y = y*3, label = glue("{label}\n({scales::percent(percent, accuracy = 0.1)})"), filter = leaf == FALSE & node != 'root', hjust = ifelse(between(node_angle(x,y), 90, 270), 1, 0)), size = 3, color = "blue", family = "Noto Sans Bold", data = stem_labels) +
+    geom_node_text(aes(x = x*3, y = y*3, label = glue("{label}\n({scales::percent(percent, accuracy = 0.1)})"),
+                       filter = leaf == FALSE & node != 'root', 
+                       hjust = ifelse(between(node_angle(x,y), 90, 270), 1, 0)), 
+                   size = 3, color = "blue", family = "Noto Sans Bold", data = stem_labels) +
     geom_segment(aes(x = 2*xold, xend = 2.8*x, y = 2*y, yend = 2.8*yend), data = lines, color = "blue", size = 0.2) +
     geom_node_point(aes(filter = leaf), colour  = "#FFDA1A") +
     annotate("label", x = 0, y = 0.15, label = "IKEA", family = "Anton", colour  = "#FFDA1A", size = 20, label.size = 0, fill = "#0051ba") +
