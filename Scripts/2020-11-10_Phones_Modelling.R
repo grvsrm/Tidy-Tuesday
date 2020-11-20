@@ -2,7 +2,7 @@
 library(tidyverse)
 library(here)
 library(directlabels)
-
+theme_set(theme_light())
 
 # Load the data
 phones <- read_rds(here("data", "phones.rds"))
@@ -62,7 +62,17 @@ summarise_subscriptions = . %>%
               p75 = quantile(subscriptions, .75))
 
 phones %>% 
-    group_by(country) %>% 
-    summarise_subscriptions()
+    filter(!is.na(income)) %>% 
+    group_by(year, income, type) %>% 
+    summarise_subscriptions() %>% 
+    ggplot(aes(year, median_subscriptions, color = type)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = p25, ymax = p75), alpha = 0.1) +
+    facet_wrap(~income) +
+    labs(title = "How do mobile and landline adoption differ in various income countries",
+         subtitle = "Ribbon shows 25th and 75th percentile",
+         y = "Median Subscriptions per person",
+         x = "",
+         color = "")
 
 

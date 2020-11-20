@@ -2,7 +2,7 @@
 library(tidytuesdayR)
 library(tidyverse)
 library(here)
-
+library(WDI)
 
 # Download and save the data
 tt <- tt_load("2020-11-10")
@@ -21,13 +21,19 @@ landline <- read_rds(here("data", "landline_raw.rds")) %>%
     rename(subscriptions = landline_subs) %>% 
     mutate(type = "landline")
 
+country_incomes <- WDI(start = 2005, end = 2005, extra = T) %>% 
+    as_tibble() %>% 
+    select(code = iso3c, income)
+
 phones <- mobile %>% 
     bind_rows(landline) %>% 
-    rename(country = entity)
+    rename(country = entity) %>% 
+    inner_join(country_incomes) %>% 
+    mutate(income = fct_relevel(income, "Low income", "Lower middle income", "Upper middle income", "High income"))
+
 
 phones %>% 
     write_rds(here("data", "phones.rds"))
     
-
 
 
