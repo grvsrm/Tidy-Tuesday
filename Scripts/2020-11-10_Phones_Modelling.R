@@ -3,6 +3,8 @@ library(tidyverse)
 library(here)
 library(directlabels)
 library(scales)
+library(gganimate)
+
 theme_set(theme_light())
 
 # Load the data
@@ -135,7 +137,6 @@ world_map_mobile <- map_data("world") %>%
     left_join(maps::iso3166 %>% as_tibble(), by = c(region = "mapname")) %>% 
     left_join(mobile, c(a3 = "code"))
 
-library(gganimate)
 
 world_map_mobile %>% 
     ggplot(aes(long, lat, group = group, fill = subscriptions)) +
@@ -146,5 +147,19 @@ world_map_mobile %>%
     ggthemes::theme_map()
 
 
+
+phones %>% 
+    filter(year == 2015) %>% 
+    top_n(9, subscriptions) %>% 
+    mutate(country = fct_reorder(country, subscriptions)) %>% 
+    ungroup() %>% 
+    ggplot(aes(subscriptions, country, fill = country)) +
+        geom_col() +
+#    transition_time(year) +
+    theme(legend.position = "none") +
+    labs(title = "Year: {frame_time}")
+
+
+#RColorBrewer::display.brewer.all()
 
 # End of Script
