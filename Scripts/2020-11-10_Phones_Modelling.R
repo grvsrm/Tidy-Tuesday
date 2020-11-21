@@ -103,6 +103,7 @@ countries_summarized <- mobile %>%
     group_by(continent, country, code) %>% 
     summarise(year_past_50_mobile = na_if(min(year[mobile >= 50]),Inf),
               peak_mobile = max(mobile),
+              peak_landline = max(landline, na.rm = T),
               n_mobile = sum(!is.na(mobile))) %>% 
     inner_join(country_incomes, by = "code") %>% 
     filter(n_mobile > 25) %>% 
@@ -119,4 +120,30 @@ countries_summarized %>%
          caption = "Data Source : WDI & R4DS",
          size = "Population",
          color = "")
+
+countries_summarized %>% 
+    filter(!is.na(gdp)) %>% 
+    ggplot(aes(gdp, peak_landline, color = continent)) +
+    geom_point(aes(size = pop)) +
+    scale_x_log10(labels = dollar) +
+    facet_wrap(~continent) +
+    theme(legend.position = "none")
+
+#### World Data
+world_map_mobile <- map_data("world") %>% 
+    as_tibble() %>% 
+    left_join(maps::iso3166 %>% as_tibble(), by = c(region = "mapname")) %>% 
+    left_join(mobile, c(a3 = "code"))
+
+library(gganimate)
+
+world_map_mobile %>% 
+    ggplot(aes(long, lat, group = group, fill = subscriptions)) +
+    geom_polygon() +
+    transition_manual(year) +
+    coord_fixed(2) +
+    scale_fill_gradient2(high = "red", low = "blue", midpoint = 30) +
+    ggthemes::theme_map()
+
+
 
