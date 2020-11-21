@@ -163,3 +163,7 @@ phones %>%
 #RColorBrewer::display.brewer.all()
 
 # End of Script
+
+
+
+library(janitor)

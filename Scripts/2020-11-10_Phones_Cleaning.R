@@ -3,6 +3,7 @@ library(tidytuesdayR)
 library(tidyverse)
 library(here)
 library(WDI)
+library(janitor)
 
 # Download and save the data
 tt <- tt_load("2020-11-10")
@@ -32,10 +33,13 @@ phones <- mobile %>%
     bind_rows(landline) %>% 
     rename(country = entity) %>% 
     inner_join(country_incomes) %>% 
-    mutate(income = fct_relevel(income, "Low income", "Lower middle income", "Upper middle income", "High income"))
+    mutate(income = fct_relevel(income, "Low income", "Lower middle income", "Upper middle income", "High income")) %>% 
+    clean_names() %>% 
+    remove_empty() %>% 
+    distinct()
 
 
 phones %>% 
     write_rds(here("data", "phones.rds"))
     
-
+# End of script
