@@ -21,9 +21,12 @@ landline <- read_rds(here("data", "landline_raw.rds")) %>%
     rename(subscriptions = landline_subs) %>% 
     mutate(type = "landline")
 
-country_incomes <- WDI(start = 2005, end = 2005, extra = T) %>% 
+country_incomes <- WDI(indicator = c("NY.GDP.PCAP.PP.KD", 
+                                     "SP.POP.TOTL"),
+                       start = 2005, end = 2005, extra = T) %>% 
     as_tibble() %>% 
-    select(code = iso3c, income)
+    select(code = iso3c, income, gdp = NY.GDP.PCAP.PP.KD) %>% 
+    filter(!is.na(income))
 
 phones <- mobile %>% 
     bind_rows(landline) %>% 
@@ -35,5 +38,4 @@ phones <- mobile %>%
 phones %>% 
     write_rds(here("data", "phones.rds"))
     
-
 

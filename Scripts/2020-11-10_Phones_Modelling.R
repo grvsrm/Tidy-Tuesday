@@ -2,6 +2,7 @@
 library(tidyverse)
 library(here)
 library(directlabels)
+library(scales)
 theme_set(theme_light())
 
 # Load the data
@@ -61,10 +62,13 @@ summarise_subscriptions = . %>%
               p25 = quantile(subscriptions, .25),
               p75 = quantile(subscriptions, .75))
 
-phones %>% 
+by_year_income <- phones %>% 
     filter(!is.na(income)) %>% 
     group_by(year, income, type) %>% 
-    summarise_subscriptions() %>% 
+    summarise_subscriptions()
+
+
+by_year_income %>% 
     ggplot(aes(year, median_subscriptions, color = type)) +
     geom_line() +
     geom_ribbon(aes(ymin = p25, ymax = p75), alpha = 0.1) +
@@ -73,6 +77,46 @@ phones %>%
          subtitle = "Ribbon shows 25th and 75th percentile",
          y = "Median Subscriptions per person",
          x = "",
-         color = "")
+         color = "",
+         caption = "Data Source: WDI API and R4DS")
 
+
+by_year_income %>% 
+    ggplot(aes(year, median_subscriptions, color = income)) +
+    geom_line(size = 1) +
+    facet_wrap(~type, nrow = 2) +
+    labs(title = "How do mobile and landline adoption differ in various income countries",
+         subtitle = "Ribbon shows 25th and 75th percentile",
+         y = "Median Subscriptions per person",
+         x = "",
+         color = "",
+         caption = "Data Source: WDI API and R4DS")    
+
+
+countries_summarized <- mobile %>% 
+    bind_rows(landline) %>% 
+    rename(country = entity) %>% 
+    filter(!is.na(subscriptions)) %>% 
+    select(-total_pop, -gdp_per_cap) %>% 
+    pivot_wider(names_from = "type",
+                values_from = "subscriptions") %>% 
+    group_by(continent, country, code) %>% 
+    summarise(year_past_50_mobile = na_if(min(year[mobile >= 50]),Inf),
+              peak_mobile = max(mobile),
+              n_mobile = sum(!is.na(mobile))) %>% 
+    inner_join(country_incomes, by = "code") %>% 
+    filter(n_mobile > 25) %>% 
+    arrange(desc(year_past_50_mobile))
+
+countries_summarized %>% 
+    ggplot(aes(year_past_50_mobile, gdp, color = continent)) +
+    geom_point(aes(size = pop)) +
+    scale_y_log10(labels = dollar) +
+    labs(title = "Adoption of Mobile phones in different countries",
+         subtitle = "By 50% of the population",
+         x = "",
+         y = "GDP per capita (In 2005)",
+         caption = "Data Source : WDI & R4DS",
+         size = "Population",
+         color = "")
 
