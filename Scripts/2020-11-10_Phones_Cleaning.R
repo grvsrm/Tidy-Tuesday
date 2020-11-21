@@ -25,7 +25,7 @@ country_incomes <- WDI(indicator = c("NY.GDP.PCAP.PP.KD",
                                      "SP.POP.TOTL"),
                        start = 2005, end = 2005, extra = T) %>% 
     as_tibble() %>% 
-    select(code = iso3c, income, gdp = NY.GDP.PCAP.PP.KD) %>% 
+    select(code = iso3c, income, gdp = NY.GDP.PCAP.PP.KD, pop = SP.POP.TOTL) %>% 
     filter(!is.na(income))
 
 phones <- mobile %>% 
