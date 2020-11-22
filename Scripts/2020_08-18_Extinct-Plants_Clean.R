@@ -26,7 +26,10 @@ plants <- read_rds(here("data", "plants_raw.rds")) %>%
     
 threats <- read_rds(here("data", "threats_raw.rds")) %>% 
     clean_names() %>% 
-    remove_empty(c("rows", "cols"))
+    remove_empty(c("rows", "cols")) %>% 
+    filter(threatened == 1) %>% 
+    mutate(year_last_seen = fct_relevel(year_last_seen, "Before 1900")) %>% 
+    select(-threatened)
 
 actions <- read_rds(here("data", "actions_raw.rds")) %>% 
     clean_names() %>% 

@@ -2,6 +2,9 @@
 library(tidyverse)
 library(here)
 library(scales)
+library(tidytext)
+library(RColorBrewer)
+
 
 theme_set(theme_light())
 
@@ -37,16 +40,21 @@ plants %>%
          caption = "Data Source : R4DS")
 
 
-threats %>% 
-    filter(threatened == 1) %>% 
+by_continent_threat <- threats %>% 
     count(threat_type, continent) %>% 
-    mutate(threat_type = fct_reorder(threat_type, n, sum)) %>% 
+    mutate(threat_type = fct_reorder(threat_type, n, sum))
+
+
+by_continent_threat %>% 
+    mutate(threat_type = reorder_within(threat_type, n, continent)) %>% 
     ggplot(aes(n, threat_type, fill = continent)) +
     geom_col() +
+    facet_wrap(~continent, scales = "free") +
+    scale_y_reordered() +
+    scale_fill_brewer(palette = "Dark2") +
     labs(title = "What are the most common threats in various continent ?",
          x = "",
          y = "",
          fill = "Continent",
          caption = "Data Source : R4DS")
-
 
