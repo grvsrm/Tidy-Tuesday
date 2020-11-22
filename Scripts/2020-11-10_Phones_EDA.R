@@ -60,6 +60,7 @@ interac_plt %>%
     ggplotly()
 
 
+# EDA ----
 
 country_sizes <- phones %>% 
     group_by(country) %>% 
