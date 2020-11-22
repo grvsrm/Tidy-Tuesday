@@ -4,6 +4,7 @@ library(here)
 library(directlabels)
 library(scales)
 library(gganimate)
+library(plotly)
 
 theme_set(theme_light())
 
@@ -22,6 +23,7 @@ phones %>%
          x = "",
          y = "Subscriptions per 100 people")
 
+# TidyX ----
 phones %>% 
     filter(!is.na(subscriptions)) %>% 
     ggplot(aes(year, subscriptions, color = type)) +
@@ -31,6 +33,32 @@ phones %>%
          color = "",
          x = "",
          y = "Subscriptions per 100 people")
+
+# Plotly ----
+interac_plt <- phones %>% 
+    filter(continent == "Americas",
+           !is.na(subscriptions),
+           !is.na(gdp_per_cap),
+           !is.na(total_pop)) %>% 
+    ggplot(aes(gdp_per_cap, subscriptions, color = country)) +
+    geom_point(aes(size = total_pop, frame = year)) +
+    facet_wrap(~type) +
+    labs(title = "How Phone Subscriptions vary over years with respect to the country's gdp",
+         subtitle = "Showing only for continent Americas",
+     color = "",
+     x = "",
+     y = "Subscriptions per 100 people") +
+    theme(legend.position = "none",
+          axis.text = element_text(size = 12, face = "bold"),
+          axis.title = element_text(size = 14, face = "bold"),
+          plot.title = element_text(size = 18, vjust = 0.5),
+          plot.subtitle = element_text(size = 16, vjust = 0.5),
+          strip.background = element_rect(fill = "black"),
+          strip.text = element_text(size = 13, face = "bold", colour = "white"))
+    
+interac_plt %>% 
+    ggplotly()
+
 
 
 country_sizes <- phones %>% 
