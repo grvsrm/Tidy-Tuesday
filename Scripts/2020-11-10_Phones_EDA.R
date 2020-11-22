@@ -41,7 +41,7 @@ interac_plt <- phones %>%
            !is.na(gdp_per_cap),
            !is.na(total_pop)) %>% 
     ggplot(aes(gdp_per_cap, subscriptions, color = country)) +
-    geom_point(aes(size = total_pop, frame = year)) +
+    geom_point(aes(size = total_pop, frame = year, ids = country)) +
     facet_wrap(~type) +
     labs(title = "How Phone Subscriptions vary over years with respect to the country's gdp",
          subtitle = "Showing only for continent Americas",
