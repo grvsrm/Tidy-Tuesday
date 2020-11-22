@@ -58,3 +58,37 @@ by_continent_threat %>%
          fill = "Continent",
          caption = "Data Source : R4DS")
 
+
+threats %>% 
+    count(year_last_seen, threat_type, continent) %>% 
+    mutate(threat_type = fct_reorder(threat_type, -n, sum))  %>% 
+    filter(fct_lump(threat_type, 9, w=n) != "Other") %>% 
+    ggplot(aes(year_last_seen, n, fill = continent)) +
+    geom_col() +
+    facet_wrap(~threat_type) +
+    theme(axis.text.x = element_text(angle = 90)) +
+    labs(title = "How the species have gone extinct due to various reasons ?",
+         x = "Last Seen",
+         y = "Number of Species",
+         caption = "Data Source : R4DS")
+
+threats %>% 
+    tabyl(country) %>% 
+    arrange(desc(percent)) %>% 
+    as_tibble()
+
+plants %>% 
+    tabyl(country) %>% 
+    arrange(desc(percent)) %>% 
+    as_tibble()
+
+plants %>% 
+    count(genus, sort = T)
+
+actions %>% 
+    count(group, sort = T)
+
+actions %>% 
+    count(action_type, sort = T)
+
+
