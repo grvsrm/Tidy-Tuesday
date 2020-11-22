@@ -1,4 +1,4 @@
-# Prerequisites
+# Prerequisites ----
 library(tidyverse)
 library(here)
 library(directlabels)
@@ -7,19 +7,27 @@ library(gganimate)
 
 theme_set(theme_light())
 
-# Load the data
+# Load the data ----
 phones <- read_rds(here("data", "phones.rds"))
 
 
-# Exploration
+# Exploration ----
 phones %>% 
     filter(country == "India",
            !is.na(subscriptions)) %>% 
     ggplot(aes(year, subscriptions, color = type)) +
     geom_line() +
-    scale_x_continuous(breaks = 1:30,
-                       labels = seq(1990, 2019, 1)) +
-    labs(title = "Phone Subscriptions over years",
+    labs(title = "Phone Subscriptions over years in India",
+         color = "",
+         x = "",
+         y = "Subscriptions per 100 people")
+
+phones %>% 
+    filter(!is.na(subscriptions)) %>% 
+    ggplot(aes(year, subscriptions, color = type)) +
+    stat_summary(fun = "mean", geom = "line", size = 1) +
+    facet_wrap(~continent) +
+    labs(title = "Phone Subscriptions over years in different continents",
          color = "",
          x = "",
          y = "Subscriptions per 100 people")
