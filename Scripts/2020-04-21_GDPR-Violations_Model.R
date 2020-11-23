@@ -1,4 +1,4 @@
-# Prerrequisites
+# Pre-requisites----
 
 library(tidyverse)
 library(tidymodels)
@@ -6,14 +6,14 @@ library(here)
 library(janitor)
 theme_set(theme_light())
 
-# Load the data
+# Load the data----
 gdpr_violations <- read_rds(here("data", "gdpr_violations.rds"))
 
 
 
-# Modelling
+# Modelling----
 
-# Data Preparation
+# Data Preparation----
 gdpr_tidy <- gdpr_violations %>% 
     transmute(id, price, country,
               article_violated,
@@ -31,12 +31,27 @@ gdpr_df <- gdpr_tidy %>%
     clean_names() %>% 
     mutate_if(is.character, factor)
 
-# Recipe
+# Recipe----
 
-recipe(price~., data = gdpr_df) %>% 
+gdpr_rec <- recipe(price~., data = gdpr_df) %>% 
     update_role(id, new_role = "id") %>% 
     step_log(price, offset = 1) %>% 
-    step_other(country, other = "Other")
-    
+    step_other(country, other = "Other") %>% 
+    step_dummy(all_nominal()) %>% 
+    step_zv(all_predictors())
 
+gdpr_prep <- gdpr_rec %>% 
+    prep()
 
+gdpr_prep %>% 
+    juice()
+
+# Model Spec----
+lm_spec <- linear_reg() %>% 
+    set_engine("lm") %>% 
+    set_mode("regression")
+
+# Workflow----
+gdpr_wf <- workflow() %>% 
+    add_recipe(gdpr_rec) %>% 
+    add_model(lm_spec)
