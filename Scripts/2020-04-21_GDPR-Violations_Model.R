@@ -55,3 +55,11 @@ lm_spec <- linear_reg() %>%
 gdpr_wf <- workflow() %>% 
     add_recipe(gdpr_rec) %>% 
     add_model(lm_spec)
+
+gdpr_fit <- gdpr_wf %>% 
+    fit(data = gdpr_df)
+
+
+gdpr_fit %>% 
+    pull_workflow_fit() %>% 
+    tidy()
