@@ -8,6 +8,8 @@ theme_set(theme_light())
 # Load the data
 
 gdpr_violation <- read_rds(here("data", "gdpr_violations.rds"))
+gdpr_text <- read_rds(here("data", "gdpr_text.rds"))
+
 
 # Explore ----
 gdpr_violation %>% 
@@ -47,4 +49,12 @@ separated_articles %>%
               violations = n()) %>% 
     arrange(desc(total_fine))
  
-            
+gdpr_violation %>% 
+    mutate(type = fct_lump(type, 8, w = price),
+           type = fct_reorder(type, price),
+           country = fct_lump(country, 5)) %>% 
+    ggplot(aes(price, type)) +
+    geom_boxplot() +
+    geom_jitter(aes(color = country)) +
+    scale_x_log10(labels = dollar_format())
+
