@@ -21,6 +21,30 @@ gdpr_violation %>%
     mutate(country = fct_reorder(country, total_fine)) %>% 
     ggplot(aes(total_fine, country)) +
     geom_col() +
-    scale_x_continuous(labels = dollar_format())
+    scale_x_continuous(labels = dollar_format()) +
+    labs(title = "Which countries have paid most fines?",
+         y = "",
+         x = "",
+         caption = "Data Source: R4DS")
 
 
+gdpr_violation %>% 
+    count(country = fct_lump(country, 6, w= price), month = floor_date(date, "month"), wt = price, name = "total_fine") %>% 
+    mutate(country = fct_reorder(country, -total_fine, sum )) %>% 
+    ggplot(aes(month, total_fine, fill = country)) +
+    geom_col()
+
+separated_articles <- gdpr_violation %>% 
+    separate_rows(article_violated, sep = "\\|") %>% 
+    extract(article_violated, "article_number", "Art\\. ?(\\d+)", remove = F)
+
+
+separated_articles %>% 
+    add_count(id) %>% 
+    mutate(price_per_article = price/n) %>%
+    group_by(article_number = fct_lump(article_number, 8, w = price)) %>% 
+    summarise(total_fine = sum(price_per_article),
+              violations = n()) %>% 
+    arrange(desc(total_fine))
+ 
+            
