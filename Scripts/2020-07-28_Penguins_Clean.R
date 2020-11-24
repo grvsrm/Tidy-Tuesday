@@ -14,10 +14,11 @@ read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
 
 penguins <- read_rds(here("data", "penguins_raw.rds")) %>% 
     clean_names() %>% 
-    remove_empty(c("rows", "cols"))
+    remove_empty(c("rows", "cols")) %>% 
+    mutate_if(is_character, factor)
 
 
-penguins
+penguins %>% view()
 
 
 
