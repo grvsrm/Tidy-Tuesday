@@ -2,6 +2,7 @@
 library(tidyverse)
 library(here)
 library(janitor)
+library(countrycode)
 
 
 # Download tha data
@@ -10,7 +11,12 @@ read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
 
 
 # Clean the data
-food_consumption <- read_rds(here("data", "food_consumption_raw.rds"))
+food_consumption <- read_rds(here("data", "food_consumption_raw.rds")) %>% 
+    mutate(continent = countrycode(country, origin = "country.name",
+                                   destination = "continent")) %>% 
+    clean_names() %>% 
+    remove_empty(c("rows", "cols"))
+
 
 
 # Save the final clean data
