@@ -2,7 +2,7 @@
 library(tidyverse)
 library(tidymodels)
 library(here)
-
+library(janitor)
 
 # Download and save the data as an rds object
 
@@ -13,6 +13,8 @@ readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/m
 # Cleaning
 
 wind_turbine <-  read_rds(here("data", "wind_turbine_raw.rds")) %>% 
+    clean_names() %>% 
+    remove_empty(c("rows", "cols")) %>% 
     transmute(turbine_capacity = turbine_rated_capacity_k_w,
            commissioning_date = parse_number(commissioning_date),
            model = fct_lump(model, 10),
