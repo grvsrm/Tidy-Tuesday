@@ -19,95 +19,97 @@ turbine_test <- testing(turbine_split)
 
 
 # Resamples
-
+set.seed(234)
 turbine_cv <- turbine_train %>% 
     vfold_cv()
 
 
 # Model Spec
-turbine_spec <- decision_tree(cost_complexity = tune(),
-                              tree_depth = tune(),
-                              min_n = tune()) %>% 
-    set_engine(engine = "rpart") %>% 
-    set_mode(mode = "regression")
+
+# Tree Spec with tuning parameters
+dt_spec <- decision_tree(cost_complexity = tune(),
+                         tree_depth = tune(),
+                         min_n = tune()) %>% 
+    set_mode("regression") %>% 
+    set_engine("rpart")
+
+# Tuning Grid
+dt_grid <- grid_regular(cost_complexity(),
+             tree_depth(),
+             min_n(),
+             levels = 4)
 
 
-# Grid Spec
-
-turbine_grid <- grid_regular(cost_complexity(),
-                             tree_depth(),
-                             min_n(),levels = 5)
-
-# Set up parallel processing
+# Initiate parallel processing
 doParallel::registerDoParallel()
 
+# Fit
+set.seed(345)
 
-# Fit the model
-set.seed(343)
-
-turbine_res <- tune_grid(
-    turbine_spec,
-    turbine_rated_capacity_k_w~.,
-    resamples = turbine_cv,
-    grid = turbine_grid,
-    metrics = metric_set(rmse, rsq, mae, mape),
-    control = control_grid(verbose = T,allow_par = T)
+dt_res <- tune_grid(dt_spec,
+          turbine_capacity~.,
+          resamples = turbine_cv,
+          grid = dt_grid,
+          metrics = metric_set(rmse, mae, rsq, mape),
+          control = control_resamples(save_pred = T, verbose = T)
 )
 
-# Results
-turbine_res %>% collect_metrics()
 
-turbine_res %>% autoplot()
-
-turbine_res %>% show_best()
-
-turbine_res %>% select_best("rmse")
+dt_res %>% collect_metrics()
+dt_res %>% collect_predictions()
+dt_res %>% autoplot()
+dt_res %>% show_best()
+dt_res %>% select_best()
 
 
-# Lets finalize the model
-turbine_final_spec <- turbine_spec %>% 
-    finalize_model(turbine_res %>%
-                       select_best("rmse"))
-
-# Lets fit this final model to the entire data
-
-final_fit <- turbine_final_spec %>% 
-    fit(turbine_rated_capacity_k_w~., 
-        turbine_train)
+# Finalize Model Spec
+dt_final_spec <- dt_spec %>% 
+    finalize_model(dt_res %>% select_best("rmse"))
 
 
-final_res <- turbine_final_spec %>% 
-    last_fit(turbine_rated_capacity_k_w~.,
-             turbine_split)
+# Finally we have two options to use this model that has final specs
 
-## Lets check final results
-final_res %>% collect_metrics()
-
-
-# Lets save this model for future(if reqd)
-
-final_fit %>% 
-    write_rds(here("models", "wind_turbine_dt_model.rds"))
-
-# For prediction using this model
-
-# First  method
-final_fit %>% 
-    predict(turbine_test[44,])
+# Method 1, It simply fitsthe model, no predictions or results are evaluated
+dt_final_fit <- fit(dt_final_spec,
+    turbine_capacity~.,
+    turbine_train)
 
 
-# Second Method
-final_res$.workflow[[1]] %>% 
-    predict(turbine_test[44,])
+# Method 2, It not only fits the model, also results are evaluated
+dt_final_res <- last_fit(dt_final_spec,
+                    turbine_capacity~.,
+                    turbine_split)
+dt_final_res$.metrics
 
-# In future if we want to predict anything on this model then...
 
-# Third  method
-wind_turbine_model <- read_rds(here("models",
-                                    "wind_turbine_dt_model.rds"))
+# Now if we want to predict using these two final outcomes
 
-wind_turbine_model %>% 
-    predict(turbine_test[44,])
+# Method 1 using output of fit
+dt_final_fit %>% 
+    predict(turbine_train[44,])
+
+
+# Method 1 using output of last_fit
+dt_final_res$.workflow[[1]] %>% 
+    predict(turbine_train[44,])
+
+# As we can see, both give same results, so these two are just to different methods, use anyone as per your need. 
+
+
+# Last thing that we should do is check the variable importance plot. 
+# Because in trees we can't see the output in a simplistic manner
+
+library(vip)
+
+dt_final_fit %>% 
+    vip(fill = "red", alpha = .4) +
+    scale_y_continuous(labels = comma_format(), expand = c(0,0))
+
+
+dt_final_res %>% 
+    collect_predictions() %>% 
+    ggplot(aes(turbine_capacity, .pred)) +
+    geom_point() +
+    geom_abline()
 
 # End of script
-
