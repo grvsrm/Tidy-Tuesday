@@ -93,7 +93,7 @@ final_res <- lm_res %>%
 # Lets examine the results
 final_res %>% 
     group_by(algo, data) %>% 
-    rsq(actual, .pred)
+    rmse(actual, .pred)
 
 # Lets visualize the results
 final_res %>% 
@@ -101,5 +101,39 @@ final_res %>%
     geom_point() +
     facet_wrap(~data)
 
+
+
+# Let try again with resampling
+
+# Resamples
+nfl_cv <- nfl_train %>% 
+    vfold_cv(strata = playoffs)
+
+# Lets fit the model again
+
+# lm fit with resamples
+
+lm_fit_cv <- fit_resamples(lm_spec,
+              weekly_attendance~.,
+              resamples = nfl_cv,
+              metrics = metric_set(rmse, rsq),
+              control = control_resamples(save_pred = T))
+
+
+# rf fit with resamples
+
+rf_fit_cv <- fit_resamples(rf_spec,
+                           weekly_attendance~.,
+                           resamples = nfl_cv,
+                           metrics = metric_set(rmse, rsq),
+                           control = control_resamples(save_pred = T))
+
+
+# Lets examine the results
+lm_fit_cv %>% 
+    collect_metrics()
+
+rf_fit_cv %>% 
+    collect_metrics()
 
 # End of Script
