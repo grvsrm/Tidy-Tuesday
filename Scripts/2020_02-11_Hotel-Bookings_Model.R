@@ -54,15 +54,62 @@ tree_spec <- decision_tree() %>%
     set_mode("classification") %>% 
     set_engine("rpart")
 
+
 # Fit
 
 knn_fit <- fit(knn_spec,
     children~.,
     data = juice(hotel_recipe))
 
+knn_fit
 
 tree_fit <- fit(tree_spec,
     children~.,
     data = hotel_recipe %>% juice())
 
+tree_fit
 
+
+# Evaluate the models
+
+set.seed(1234)
+
+hotel_cv <- hotel_recipe %>%
+    juice() %>%
+    mc_cv(strata = children, prop = 0.9)
+
+
+knn_fit_resampled <- fit_resamples(knn_spec,
+              children~.,
+              resamples = hotel_cv,
+              control = control_resamples(save_pred = T),
+              metrics = metric_set(accuracy, roc_auc))
+
+knn_fit_resampled %>% 
+    collect_metrics()
+
+tree_fit_resampled <- tree_spec %>% 
+    fit_resamples(children~.,
+        resamples = hotel_cv,
+        control = control_resamples(save_pred = T),
+        metrics = metric_set(accuracy, roc_auc))
+
+tree_fit_resampled %>% collect_metrics()
+
+knn_fit_resampled %>% 
+    unnest(.predictions) %>% 
+    mutate(model = "knn") %>% 
+    bind_rows(tree_fit_resampled %>% 
+                  unnest(.predictions) %>% 
+                  mutate(model = "rpart") ) %>% 
+    group_by(model) %>% 
+    roc_curve(children, .pred_children) %>% 
+    autoplot()
+    
+tree_fit_resampled %>% 
+    unnest(.predictions) %>% 
+    conf_mat(children, .pred_class) %>% 
+    autoplot(type = "heatmap")
+
+
+# End of script
