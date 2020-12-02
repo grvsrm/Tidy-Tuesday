@@ -17,5 +17,3 @@ big_epa_cars %>%
            guzzler, highway_mpg = highway08, highway_e,
            make, model, v_class, year, you_save_spend,
            charger)
-big_epa_cars %>% summary()
-big_epa_cars %>% skimr::skim()
