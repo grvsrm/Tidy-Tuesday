@@ -134,14 +134,19 @@ plot_1 <- ggdraw()+
 
 
 # file_path <- here(2020, "plots")
+
 plot_1 %>% 
     ggsave(filename = "Washington.png",path = here("Plots"))
 
-ggsave(paste0(file_path, ".pdf"), plot_1, width = 9.5, height = 6, device = cairo_pdf)
+plot_1 %>% 
+    ggsave(filename = "Washington.pdf",path = here("Plots"))
 
-pdftools::pdf_convert(paste0(file_path, ".pdf"), filenames = paste0(file_path, ".png"), dpi = 300)
-ggsave(paste0(file_path, ".jpg"), plot_1, width = 9.5, height = 6, dpi = 100,
-       type = "cairo")
+# ggsave(paste0(file_path, ".pdf"), plot_1, width = 9.5, height = 6, device = cairo_pdf)
+
+# pdftools::pdf_convert(paste0(file_path, ".pdf"), filenames = paste0(file_path, ".png"), dpi = 300)
+# ggsave(paste0(file_path, ".jpg"), plot_1, width = 9.5, height = 6, dpi = 100,
+#        type = "cairo")
+# 
 
 
-
+# End of script
