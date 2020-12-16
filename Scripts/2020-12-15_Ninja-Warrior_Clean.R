@@ -21,3 +21,4 @@ ninja_cleaned %>% view()
 
 ninja_cleaned %>% 
     write_rds(here("data", "ninja_warrior_cleaned.rds"))
+
