@@ -14,11 +14,9 @@ read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
 
 ninja_cleaned <- read_rds(here("data", "ninja warrior_raw.rds")) %>% 
     clean_names() %>% 
-    remove_empty(c("rows", "cols"))
-
-ninja_cleaned %>% view()
-
+    remove_empty(c("rows", "cols")) %>% 
+    mutate(obstacle_name = str_replace(obstacle_name, "\\(Modified\\) ", ""),
+           round_stage = str_remove(round_stage, " \\(Regional/City\\)"))
 
 ninja_cleaned %>% 
     write_rds(here("data", "ninja_warrior_cleaned.rds"))
-
