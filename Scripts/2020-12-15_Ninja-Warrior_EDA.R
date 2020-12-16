@@ -1,10 +1,12 @@
-# Pre requisistes
+# Pre requisites
 library(tidyverse)
 library(here)
 library(scales)
 library(tidylo)
 library(tidytext)
+library(glue)
 
+theme_set(theme_light())
 
 # Data
 ninja_warrior <- read_rds(here("data", "ninja_warrior_cleaned.rds"))
@@ -54,5 +56,44 @@ ninja_warrior %>%
          size = "% of courses")
 
 
+
+
+ninja_warrior %>% 
+    filter(round_stage == "Qualifying") %>% 
+    add_count(obstacle_order, round_stage, name = "round_stage_total") %>% 
+    add_count(obstacle_name, name = "obstacle_total") %>% 
+    mutate(obstacle_name = glue("{obstacle_name} ({obstacle_total})"),
+           obstacle_name = fct_lump(obstacle_name, 10),
+           obstacle_name = fct_reorder(obstacle_name, obstacle_order)) %>% 
+    ggplot(aes(obstacle_order, obstacle_name)) +
+    geom_boxplot() +
+    scale_x_continuous(breaks = 1:10) +
+    labs(x = "Steps",
+         y = "")
+
+
+ninja_warrior %>% 
+    mutate(obstacle_name = fct_lump(obstacle_name, 10),
+           obstacle_name = fct_reorder(obstacle_name, season)) %>% 
+    ggplot(aes(season, obstacle_name)) +
+    geom_boxplot() +
+    scale_x_continuous(breaks = 1:10) +
+    labs(x = "Seasons",
+         y = "")
+
+# End of script
     
+
+
+
+
+
+
+
+
+
+
+
+
+
 
