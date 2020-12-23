@@ -3,6 +3,8 @@ library(tidyverse)
 library(here)
 library(lubridate)
 library(ggrepel)
+library(gganimate)
+library(widyr)
 
 theme_set(theme_light())
 
@@ -71,6 +73,42 @@ bigmac %>%
     labs(x = "Big Mac Index (GDP Adjusted)",
          y = "")
 
+
+bigmac %>% 
+    filter(country_total == max(country_total)) %>% 
+    select(date, country, local_price, dollar_ex, usd_raw, gdp_dollar, usd_adjusted) %>% 
+    filter(!is.na(gdp_dollar),
+           country != "United States") %>% 
+    mutate(country = fct_reorder(country, usd_raw)) %>% 
+    ggplot(aes(date, usd_adjusted, color = country)) +
+    geom_line(size = 1, show.legend = F) +
+    geom_hline(yintercept = 0, lty = 3, color = "gray40", size = 1) +
+    expand_limits(y = 0) +
+    facet_wrap(~country) +
+    labs(y = "Big Mac Index (GDP Adjusted)",
+         x = "") +
+    theme_minimal()
+
+
+bigmac %>% 
+    filter(country_total == max(country_total),
+           !is.na(gdp_dollar)) %>% 
+    ggplot(aes(gdp_dollar, usd_adjusted)) +
+    geom_point(size = 1) +
+    geom_text_repel(aes(label = country)) +
+    geom_smooth(method = "lm") +
+    transition_time(date) +
+    # transition_manual(date) +
+    labs(x = "GDP per capita (dollars)",
+         y = "Raw Big Mac index relative to USD",
+         title = "{ frame_time }")
+
+
+bigmac %>% 
+    filter(!is.na(gdp_dollar)) %>% 
+    pairwise_cor(country, date, local_price, sort = T)
+
+# End of Script    
 
 
 
