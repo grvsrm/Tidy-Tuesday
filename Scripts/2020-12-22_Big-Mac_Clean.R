@@ -14,9 +14,12 @@ read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
 bigmac_clean <- read_rds(here("data", "bigmac_raw.rds")) %>% 
     clean_names() %>% 
     remove_empty(c("rows", "cols")) %>% 
-    rename("country" = name)
+    rename("country" = name) %>% 
+    add_count(country, name = "country_total") %>% 
+    arrange(country, date)
 
 # Save the clean data
 
 bigmac_clean %>% 
     write_rds(here("data", "bigmac_cleaned.rds"))
+
