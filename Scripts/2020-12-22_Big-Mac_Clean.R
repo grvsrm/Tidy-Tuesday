@@ -16,9 +16,6 @@ bigmac_clean <- read_rds(here("data", "bigmac_raw.rds")) %>%
     remove_empty(c("rows", "cols")) %>% 
     rename("country" = name)
 
-
-
-
 # Save the clean data
 
 bigmac_clean %>% 
