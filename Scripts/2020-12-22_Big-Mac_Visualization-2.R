@@ -75,5 +75,4 @@ ggsave(here("plots", "2020-w52-bigmacindex.png"), device = ragg::agg_png(), widt
 
 dev.off()
 
-
 # End of script
