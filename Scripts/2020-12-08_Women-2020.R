@@ -16,8 +16,14 @@ showtext_auto(enable = T)
 
 font_families()
 font_add_google(name = "Roboto")
+
+# Download the data
+read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-12-08/women.csv') %>% 
+  write_rds(here("data", "women-2020.rds"))
+
+women <- read_rds(here("data", "women-2020.rds"))
+
 # Prepare Data
-women <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-12-08/women.csv')
 
 women_cleaned <- women %>% 
     mutate(continent = countrycode(women$country,"country.name","continent"),
