@@ -18,6 +18,7 @@ read_csv("https://github.com/tategallery/collection/raw/master/artist_data.csv")
 read_rds(here("data", "artwork_raw.rds")) %>% 
     clean_names() %>% 
     remove_empty(c("rows" , "cols")) %>% 
+    separate(medium, into = c("medium",  "surface"),sep = " on ", extra = "merge",fill = "left") %>% 
     write_rds(here("data", "artwork_clean.rds"))
 
 
