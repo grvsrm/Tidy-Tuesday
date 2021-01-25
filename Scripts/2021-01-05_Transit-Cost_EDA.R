@@ -51,3 +51,10 @@ transit_cost %>%
     labs(x = "Cost/km (Millions USD)",
          y = "") +
     expand_limits(x = 0)
+
+transit_cost %>% 
+    filter(country_name == "China") %>% 
+    mutate(decade = start_year%/%5*5) %>% 
+    ggplot(aes(decade, cost_km_millions, group = decade)) +
+    geom_boxplot() +
+    geom_jitter()
