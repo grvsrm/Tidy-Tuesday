@@ -3,7 +3,9 @@ library(tidyverse)
 library(here)
 library(tidymodels)
 library(janitor)
+library(ggrepel)
 
+theme_set(theme_light())
 
 # Download the data
 key_crop_yields <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-09-01/key_crop_yields.csv")
@@ -24,7 +26,7 @@ top_countries <- land_use %>%
     pull(entity)
 
 
-key_crop_yields %>% 
+tidy_yields <- key_crop_yields %>% 
     clean_names() %>% 
     pivot_longer(wheat_tonnes_per_hectare: bananas_tonnes_per_hectare,
                  names_to = "crop",
@@ -34,3 +36,36 @@ key_crop_yields %>%
     filter(crop %in% c("wheat", "maize", "barley", "rice"),
            entity %in% top_countries)
 
+
+tidy_yields %>% 
+    ggplot(aes(year, yield, color = crop)) +
+    geom_line(size = 1) +
+    facet_wrap(~entity) +
+    theme_minimal() +
+    labs(title = "Yield across various countries over years",
+         x = "")
+
+
+# Model
+yield_res <- tidy_yields %>% 
+    nest(data = c(year, yield)) %>% 
+    mutate(model = map(data, ~lm(yield~year, data = .)),
+           coef = map(model, tidy)) %>% 
+    unnest(coef)
+
+
+# Results
+yield_res %>% 
+    filter(term == "year",
+           entity != "World") %>% 
+    mutate(p.value = p.adjust(p.value)) %>% 
+    ggplot(aes(estimate, p.value)) +
+    geom_point(aes(color = crop), size = 2) +
+    facet_wrap(~crop) +
+    scale_y_log10() +
+    geom_vline(xintercept = 0, lty = 2) +
+    geom_text_repel(aes(label = entity)) +
+    theme(legend.position = "none")
+        
+
+# End of script 
